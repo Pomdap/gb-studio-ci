@@ -1,0 +1,66 @@
+name: Build Container Image
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: GB Studio version to embded eg. (3.2.0)
+        type: string
+        required: true
+      tag:
+        description: Tag of the image to build eg. (unstable, latest, 3.2.0)
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: GB Studio version to embded eg. (3.2.0)
+        type: string
+        required: true
+      tag:
+        description: Tag of the image to build eg. (unstable [by default], latest, 3.2.0)
+        type: string
+        default: unstable
+        required: true
+env:
+  IMAGE_NAME: gb-studio-ci
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - run:  echo IMAGE_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: ${{ inputs.tag }}
+          labels: |
+            org.opencontainers.image.authors=https://github.com/Pomdap/gb-studio-ci/graphs/contributors
+            org.opencontainers.image.title=GB Studio CI
+            org.opencontainers.image.description=A Docker image equipped with a great toolset to streamline the exporting process of GB Studio games.
+      - name: Login to GitHub Container Registry 
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          file: './Dockerfile'
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GBSTUDIO_VERSION=${{ inputs.version }}

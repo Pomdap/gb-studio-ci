@@ -1,0 +1,27 @@
+name: Check Container Image
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Tag of the image to check eg. (unstable, latest, 3.2.0)
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag of the image to check eg. (unstable, latest, 3.2.0)
+        type: string
+        required: true
+jobs:
+  check-command:
+    name: Check container
+    runs-on: ubuntu-20.04
+    container:
+      image: pomdap/gb-studio-ci:${{ inputs.tag }}
+    steps:
+      - name: ENV
+        run: env
+      - name: PWD
+        run: pwd
+      - name: Check command 'gb-studio-cli'
+        run: command -v gb-studio-cli && gb-studio-cli --version && gb-studio-cli --help

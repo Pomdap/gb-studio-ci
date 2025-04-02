@@ -1,0 +1,10 @@
+{
+  "name": "gb-studio-ci-container",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "docker build --tag gb-studio-ci ./",
+    "start": "docker run --name gb-studio-ci gb-studio-ci:latest"
+  },
+  "keywords": [],
+  "author": "Pomdap"
+}

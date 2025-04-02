@@ -1,0 +1,16 @@
+name: Clean Workflow Runs
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '55 6 * * *'
+jobs:
+  clean-workflow-runs:
+    name: Clean workflow runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: JuvenileQ/delete-workflow-runs@main
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 7
+          keep_minimum_runs: 0

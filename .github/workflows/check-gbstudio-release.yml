@@ -1,0 +1,118 @@
+name: Check GB Studio Release
+on:
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild all versions'
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '55 5 * * *'
+env:
+  GBSTUDIO_RELEASES_URL: https://api.github.com/repos/chrismaltby/gb-studio/releases
+jobs:
+  pull-versions:
+    name: Pull GB Studio versions
+    runs-on: ubuntu-latest
+    outputs:
+      gbstudio-all-versions-json: ${{ steps.pull.outputs.gbstudio-all-versions-json }}
+      gbstudio-latest-version: ${{ steps.pull.outputs.gbstudio-latest-version }}
+      gbstudio-new-versions-json: ${{ steps.pull.outputs.gbstudio-new-versions-json }}
+    steps:
+      - id: pull
+        name: Pull all versions and filter new ones
+        run: |
+          # Fetch all GB Studio versions
+          all_versions_json=$(curl --fail -s ${{ env.GBSTUDIO_RELEASES_URL }} | jq -c '[.[]|select(.tag_name | (match("^v(?![0,1,2]).*$"))).tag_name | sub("v"; "")]|sort|reverse')
+
+          # Fetch already built versions from repository variable
+          built_versions_json='${{ vars.GBSTUDIO_BUILT_VERSIONS_JSON }}'
+
+          # Filter versions that are not yet built (unless force_rebuild is true)
+          if [ "${{ github.event.inputs.force_rebuild }}" != "true" ]; then
+            new_versions_json=$(echo "$all_versions_json" | jq --argjson built "$built_versions_json" '[.[] | select(. as $v | $built | index($v) | not)]')
+          else
+            # If force_rebuild is true, consider all versions as new
+            new_versions_json=$all_versions_json
+          fi
+
+          # Output all versions and the latest version
+          echo gbstudio-all-versions-json=$all_versions_json >> $GITHUB_OUTPUT
+          echo gbstudio-latest-version=$(echo "$all_versions_json" | jq -r 'first') >> $GITHUB_OUTPUT
+
+          # Output only new versions that haven't been built yet, or all if forced rebuild
+          echo gbstudio-new-versions-json=$new_versions_json >> $GITHUB_OUTPUT
+
+  build-all-versions:
+    name: Build all versions that don't exist yet (or force rebuild)
+    uses: ./.github/workflows/build-container-image.yml
+    needs: pull-versions
+    if: (needs.pull-versions.outputs.gbstudio-new-versions-json != '[]' && needs.pull-versions.outputs.gbstudio-new-versions-json != '')
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.pull-versions.outputs.gbstudio-new-versions-json) }}
+    permissions:
+      contents: read
+      packages: write
+    with:
+      version: ${{ matrix.version }}
+      tag: ${{ matrix.version }}
+    secrets: inherit
+
+  build-latest-version:
+    name: Build latest version
+    uses: ./.github/workflows/build-container-image.yml
+    needs: pull-versions
+    if: (vars.GBSTUDIO_LATEST_VERSION != needs.pull-versions.outputs.gbstudio-latest-version)
+    permissions:
+      contents: read
+      packages: write
+    with:
+      version: ${{ needs.pull-versions.outputs.gbstudio-latest-version }}
+      tag: latest
+    secrets: inherit
+
+  check-all-versions:
+    name: Check all versions
+    uses: ./.github/workflows/check-container-image.yml
+    needs: [pull-versions, build-latest-version, build-all-versions]
+    if: |
+      !cancelled() &&
+      (needs.pull-versions.result == 'success') && 
+      (needs.build-all-versions.result == 'success' || needs.build-all-versions.result == 'skipped') && 
+      (needs.build-latest-version.result == 'success' || needs.build-latest-version.result == 'skipped') &&
+      (needs.pull-versions.outputs.gbstudio-new-versions-json != '[]' && needs.pull-versions.outputs.gbstudio-new-versions-json != '')
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.pull-versions.outputs.gbstudio-new-versions-json) }}
+    with:
+      tag: ${{ matrix.version }}
+
+  update-version:
+    name: Update latest GB Studio version
+    needs: [check-all-versions, pull-versions]
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Escape GBSTUDIO_ALL_VERSIONS_JSON
+        run: echo GBSTUDIO_ALL_VERSIONS_JSON_ESCAPED=$(echo '${{ needs.pull-versions.outputs.gbstudio-all-versions-json }}' | sed ' s/"/\\"/g') >> $GITHUB_ENV
+      - name: Update built versions json
+        run: |
+          curl -L \
+          --fail \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.VARIABLE_RW_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/actions/variables/GBSTUDIO_BUILT_VERSIONS_JSON \
+          -d '{"name":"GBSTUDIO_BUILT_VERSIONS_JSON","value":"${{ env.GBSTUDIO_ALL_VERSIONS_JSON_ESCAPED }}"}'
+      - name: Update latest version
+        run: |
+          curl -L \
+          --fail \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.VARIABLE_RW_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/actions/variables/GBSTUDIO_LATEST_VERSION \
+          -d '{"name":"GBSTUDIO_LATEST_VERSION","value":"${{ needs.pull-versions.outputs.gbstudio-latest-version }}"}'
