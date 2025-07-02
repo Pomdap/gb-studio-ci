@@ -37,20 +37,18 @@ With this image, you can:
 
 ## How to Use This Image
 
-<!-- 
-### Clone the Example Project
+### Clone the Example Project Template
 
-To get started quickly, clone the example project from the [gb-studio-ci-example](https://github.com/Pomdap/gb-studio-ci-example) repository.
+To get started quickly, clone the example project from the [gb-studio-ci-example](https://github.com/Pomdap/gb-studio-ci-example) using the [`Use this template`](https://github.com/new?template_name=gb-studio-ci-example&template_owner=Pomdap) button or by [downloading the source code](https://github.com/Pomdap/gb-studio-ci-example/archive/refs/heads/main.zip).
 
-```sh
-git clone https://github.com/Pomdap/gb-studio-ci-example.git
-```
+This repository contains multiple GitHub Actions workflows that automate various aspects of the export and deployment process like deploying to [itch.io](https://itch.io/).  
+For more details, check out the complete workflow setup in the [example repository](https://github.com/Pomdap/gb-studio-ci-example).
 
-This repository contains multiple GitHub Actions workflows that automate various aspects of the export and deployment process. For more details, check out the complete workflow setup in the [example repository](https://github.com/Pomdap/gb-studio-ci-example).
- -->
 ### Use it in your own GitHub Actions
 
-You can integrate this Docker image into your GitHub Actions workflow. Below is an example configuration for exporting a ROM using GB Studio CI:
+You can integrate this Docker image into your GitHub Actions workflow.
+
+Here is an example configuration for exporting a ROM using GB Studio CI:
 
 ```yaml
 export-rom:
