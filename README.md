@@ -8,6 +8,7 @@ A Docker image equipped with a powerful toolset to streamline the export process
 This image is available in multiple versions to support different GB Studio releases. You can find the available tags below:
 
 - `unstable`
+- [`develop`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
 - [`4.1.3`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile), [`latest`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
 - [`4.1.2`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
 - [`4.1.1`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
