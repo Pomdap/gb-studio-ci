@@ -1,0 +1,56 @@
+name: Check GB Studio Develop
+on:
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild'
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '12 7 * * *'
+env:
+  GBSTUDIO_DEVELOP_URL: https://api.github.com/repos/chrismaltby/gb-studio/commits/develop
+jobs:
+  check-develop:
+    name: Check develop branch for new commits
+    runs-on: ubuntu-latest
+    outputs:
+      latest-commit-sha: ${{ steps.check.outputs.latest-commit-sha }}
+    steps:
+      - id: check
+        name: Check for new commits on develop
+        run: |
+          latest_commit_sha=$(curl --fail -s ${{ env.GBSTUDIO_DEVELOP_URL }} | jq -r '.sha')
+          
+          # Set output
+          echo "latest-commit-sha=$latest_commit_sha" >> $GITHUB_OUTPUT
+
+  build-develop:
+    name: Build latest develop
+    uses: ./.github/workflows/build-container-image.yml
+    needs: check-develop
+    if: (vars.GBSTUDIO_LATEST_DEVELOP_COMMIT != needs.check-develop.outputs.latest-commit-sha)
+    permissions:
+      contents: read
+      packages: write
+    with:
+      branch: develop
+      tag: develop
+    secrets: inherit
+
+  update-version:
+    name: Update latest develop commit
+    needs: [check-develop, build-develop]
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update latest develop commit
+        run: |
+          curl -L \
+          --fail \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.VARIABLE_RW_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/actions/variables/GBSTUDIO_LATEST_DEVELOP_COMMIT \
+          -d '{"name":"GBSTUDIO_LATEST_DEVELOP_COMMIT","value":"${{ needs.check-develop.outputs.latest-commit-sha }}"}'
