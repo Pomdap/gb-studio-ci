@@ -25,8 +25,8 @@ ENV GBSTUDIO_VERSION=$GBSTUDIO_VERSION
 
 RUN source $NVM_DIR/nvm.sh \
     # clone gb-studio
-    && git clone --single-branch --branch v$GBSTUDIO_VERSION https://github.com/chrismaltby/gb-studio.git gb-studio-$GBSTUDIO_VERSION \
-    && cd gb-studio-$GBSTUDIO_VERSION \
+    && git clone --single-branch --branch v$GBSTUDIO_VERSION https://github.com/chrismaltby/gb-studio.git gb-studio \
+    && cd gb-studio \
     # install dependencies
     && nvm install $(cut -d. -f1 < .nvmrc) -b \
     && if [ -f ".yarnrc" ]; then \
@@ -40,7 +40,7 @@ RUN source $NVM_DIR/nvm.sh \
     && npm run make:cli \
     # link cli
     && ln -s $NVM_BIN/node /usr/bin/node \
-    && ln -s /usr/lib/gb-studio-$GBSTUDIO_VERSION/out/cli/gb-studio-cli.js /usr/bin/gb-studio-cli \
+    && ln -s /usr/lib/gb-studio/out/cli/gb-studio-cli.js /usr/bin/gb-studio-cli \
     && chmod +x out/cli/gb-studio-cli.js \
     # confirm build
     && gb-studio-cli --version \
