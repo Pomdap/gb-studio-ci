@@ -25,7 +25,7 @@ ENV GBSTUDIO_VERSION=$GBSTUDIO_VERSION
 
 RUN source $NVM_DIR/nvm.sh \
     # clone gb-studio
-    && git clone -b v$GBSTUDIO_VERSION https://github.com/chrismaltby/gb-studio.git gb-studio-$GBSTUDIO_VERSION \
+    && git clone --single-branch --branch v$GBSTUDIO_VERSION https://github.com/chrismaltby/gb-studio.git gb-studio-$GBSTUDIO_VERSION \
     && cd gb-studio-$GBSTUDIO_VERSION \
     # install dependencies
     && nvm install $(cut -d. -f1 < .nvmrc) -b \
