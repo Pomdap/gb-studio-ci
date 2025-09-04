@@ -2,8 +2,8 @@ name: Build Container Image
 on:
   workflow_call:
     inputs:
-      version:
-        description: GB Studio version to embded eg. (3.2.0)
+      branch:
+        description: GB Studio branch to embded eg. (v3.2.0)
         type: string
         required: true
       tag:
@@ -12,8 +12,8 @@ on:
         required: true
   workflow_dispatch:
     inputs:
-      version:
-        description: GB Studio version to embded eg. (3.2.0)
+      branch:
+        description: GB Studio branch to embded eg. (v3.2.0)
         type: string
         required: true
       tag:
@@ -63,4 +63,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            GBSTUDIO_VERSION=${{ inputs.version }}
+            BRANCH=${{ inputs.branch }}

@@ -55,7 +55,7 @@ jobs:
       contents: read
       packages: write
     with:
-      version: ${{ matrix.version }}
+      branch: v${{ matrix.version }}
       tag: ${{ matrix.version }}
     secrets: inherit
 
@@ -68,7 +68,7 @@ jobs:
       contents: read
       packages: write
     with:
-      version: ${{ needs.pull-versions.outputs.gbstudio-latest-version }}
+      branch: v${{ needs.pull-versions.outputs.gbstudio-latest-version }}
       tag: latest
     secrets: inherit
 

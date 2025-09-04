@@ -20,12 +20,12 @@ RUN mkdir $NVM_DIR && \
 # Install GB Studio
 WORKDIR /usr/lib
 
-ARG GBSTUDIO_VERSION
-ENV GBSTUDIO_VERSION=$GBSTUDIO_VERSION
+ARG BRANCH
+ENV BRANCH=$BRANCH
 
 RUN source $NVM_DIR/nvm.sh \
     # clone gb-studio
-    && git clone --single-branch --branch v$GBSTUDIO_VERSION https://github.com/chrismaltby/gb-studio.git gb-studio \
+    && git clone --single-branch --branch $BRANCH https://github.com/chrismaltby/gb-studio.git gb-studio \
     && cd gb-studio \
     # install dependencies
     && nvm install $(cut --delimiter='.' --fields=1 < .nvmrc) --reinstall-packages-from=current \
