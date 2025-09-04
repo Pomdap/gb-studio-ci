@@ -27,18 +27,22 @@ RUN source $NVM_DIR/nvm.sh \
     # clone gb-studio
     && git clone -b v$GBSTUDIO_VERSION https://github.com/chrismaltby/gb-studio.git gb-studio-$GBSTUDIO_VERSION \
     && cd gb-studio-$GBSTUDIO_VERSION \
-    # build cli
+    # install dependencies
     && nvm install $(cut -d. -f1 < .nvmrc) -b \
-    && npm install -g yarn \
-    && yarnpkg \
+    && if [ -f ".yarnrc" ]; then \
+        npm install -g corepack && \
+        corepack enable; \
+    else \
+        npm install -g yarn; \
+    fi \
+    && yarn install \
+    # build
     && npm run make:cli \
     # link cli
-    && yarnpkg link \
     && ln -s $NVM_BIN/node /usr/bin/node \
-    && ln -s /usr/lib/gb-studio-$GBSTUDIO_VERSION/out/cli/gb-studio-cli.js /usr/bin/gb-studio-cli-$GBSTUDIO_VERSION \
+    && ln -s /usr/lib/gb-studio-$GBSTUDIO_VERSION/out/cli/gb-studio-cli.js /usr/bin/gb-studio-cli \
     && chmod +x out/cli/gb-studio-cli.js \
     # confirm build
-    && gb-studio-cli-$GBSTUDIO_VERSION --version \
     && gb-studio-cli --version \
     # clean
     && npm remove -g yarn
