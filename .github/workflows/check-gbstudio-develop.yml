@@ -20,7 +20,7 @@ jobs:
       - id: check
         name: Check for new commits on develop
         run: |
-          latest_commit_sha=$(curl --fail -s ${{ env.GBSTUDIO_DEVELOP_URL }} | jq -r '.sha')
+          latest_commit_sha=$(curl --fail -s ${{ env.GBSTUDIO_DEVELOP_URL }} | jq -r '.sha // ""')
           
           # Set output
           echo "latest-commit-sha=$latest_commit_sha" >> $GITHUB_OUTPUT
@@ -29,7 +29,7 @@ jobs:
     name: Build latest develop
     uses: ./.github/workflows/build-container-image.yml
     needs: check-develop
-    if: (vars.GBSTUDIO_LATEST_DEVELOP_COMMIT != needs.check-develop.outputs.latest-commit-sha) || (inputs.force_rebuild == 'true')
+    if: needs.check-develop.outputs.latest-commit-sha != '' && ((vars.GBSTUDIO_LATEST_DEVELOP_COMMIT != needs.check-develop.outputs.latest-commit-sha) || (inputs.force_rebuild == 'true'))
     permissions:
       contents: read
       packages: write
