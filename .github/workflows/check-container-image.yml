@@ -15,7 +15,7 @@ on:
 jobs:
   check-command:
     name: Check container
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
       image: pomdap/gb-studio-ci:${{ inputs.tag }}
     steps:
