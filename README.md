@@ -9,7 +9,11 @@ This image is available in multiple versions to support different GB Studio rele
 
 - `unstable`
 - [`develop`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
-- [`4.2.0-beta2`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile), [`latest`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
+- [`4.2.2`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile), [`latest`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
+- [`4.2.1`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
+- [`4.2.0`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
+- [`4.2.0-beta3`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
+- [`4.2.0-beta2`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
 - [`4.2.0-beta1`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
 - [`4.1.3`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
 - [`4.1.2`](https://github.com/Pomdap/gb-studio-ci/blob/main/Dockerfile)
