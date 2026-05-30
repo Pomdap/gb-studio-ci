@@ -36,6 +36,7 @@ RUN source $NVM_DIR/nvm.sh \
         npm install --global yarn; \
     fi \
     && yarn install \
+    && npm run fetch-deps || echo "fetch-deps not available" \
     # build
     && npm run make:cli \
     # link cli
